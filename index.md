@@ -184,3 +184,8 @@ class ErrorInterceptor: Interceptor{
 
 Step 1: layout
 Step 2: WidgetProvider class
+
+Step N: Create Widget Preview
+Android emulators include an application called "Widget Preview". To create a preview image, launch this application, select the app widget for your application. Then take a snapshot. To save it on your computer, run next command:
+    adb pull sdcard/Download/{name_of_snapshot}.png {path_on_computer}
+After that you need to place it to application's drawable resources
