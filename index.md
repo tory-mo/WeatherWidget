@@ -1,191 +1,155 @@
+# Preparations
+
 For this project we need an API key for [openweathermap.org](https://openweathermap.org)
 
-#Preparing
-
-###Retrofit
-```markdown
+### Retrofit
+```gradle
 def retrofitVersion = '2.4.0'
 implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
 implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
 ```
-###okhttp3
-```markdown
+### okhttp3
+```gradle
 def okhttpVersion = '3.9.1'
 implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
 implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 ```
-Classes to handle JSON Responses automatically with Gson
-```markdown
-data class CurrentWeatherResponse(
-    val cod: Int = 0,
-    val id: Int = 0,
-    val name: String = "",
-    val dt: Long = 0,
-    val base: String = "",
-    val coord: Coord = Coord(),
-    val weather: List<WeatherCondition> = mutableListOf(),
-    val main: MainWeatherInfo = MainWeatherInfo(),
-    val wind: Wind = Wind(),
-    val clouds: Clouds = Clouds(),
-    val rain: Rain = Rain(),
-    val sys: Sys = Sys()
+Classes to handle JSON Responses automatically with Gson: [Responses.kt](app/src/main/java/by/torymo/weatherwidget/service/Responses.kt)
 
-)
+Interface describing requests to Retrofit: [OpenWeatherService.kt](app/src/main/java/by/torymo/weatherwidget/service/OpenWeatherService.kt)
 
-data class Coord(val lon: Float = 0.0f, val lat: Float = 0.0f)
+Classes to initialize Retrofit and make requests: [Requester.kt](app/src/main/java/by/torymo/weatherwidget/service/Requester.kt)
 
-data class WeatherCondition(
-    val id:Int = 0, //weather condition id
-    val main: String = "", // Group of weather parameters (Rain, Snow, Extreme etc.)
-    val description: String = "", // Weather condition within the group
-    val icon: String = "" // Weather icon id
-)
+Service to receive data: [Requester.kt](app/src/main/java/by/torymo/weatherwidget/WeatherSyncService.kt)
 
-data class MainWeatherInfo(
-    val temp: Float = 0.0f, // Temperature. Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
-    val pressure: Float = 0.0f, // Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa
-    val sea_level: Float = 0.0f, // Atmospheric pressure on the sea level, hPa
-    val grnd_level: Float = 0.0f, // Atmospheric pressure on the ground level, hPa
-    val humidity: Int = 0, // Humidity, %
-    val temp_min: Float = 0.0f, // Minimum temperature at the moment. This is deviation from current temp that is possible for large cities and megalopolises geographically expanded (use these parameter optionally). Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
-    val temp_max: Float = 0.0f // Maximum temperature at the moment. This is deviation from current temp that is possible for large cities and megalopolises geographically expanded (use these parameter optionally). Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
-)
+Utility functions: [util.kt](app/src/main/java/by/torymo/weatherwidget/util.kt)
 
-data class Wind(
-    val speed: Float = 0.0f, // Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
-    val deg: Float = 0.0f // Wind direction, degrees (meteorological)
-)
+# Widget
 
-data class Clouds(
-    val all: Float = 0.0f // Cloudiness, %
-)
+## Step 1: Create layout
 
-data class Rain(
-    @SerializedName("1h")
-    val h1: Float = 0.0f, // Rain volume for the last 1 hour, mm
-    @SerializedName("3h")
-    val h3: Float = 0.0f // Rain volume for the last 3 hours, mm
-)
+App Widget layouts are based on RemoteViews, and support limited list of layout kinds and view widget. A RemoteViews object (and, consequently, an App Widget) can support the following layout classes: **FrameLayout, LinearLayout, RelativeLayout, GridLayout**. And the following widget classes: **AnalogClock, Button, Chronometer, ImageButton, ImageView, ProgressBar, TextView, TextClock, ViewFlipper, ListView, GridView, StackView, AdapterViewFlipper**. Descendants of these classes are not supported. RemoteViews also supports ViewStub, which is an invisible, zero-sized View you can use to lazily inflate layout resources at runtime.
 
-data class Sys(
-    val type: Float = 0.0f, // Internal parameter
-    val id:Int = 0, // Internal parameter
-    val message: Float = 0.0f, // Internal parameter
-    val country: String = "", // Country code (GB, JP etc.)
-    val sunrise: Long = 0, // Sunrise time, unix, UTC
-    val sunset: Long = 0 // Sunset time, unix, UTC
-)
+## Step 2: Add AppWidgetProviderInfo Metadata
+
+Notice, that if several widgets are needed, for each there must be separeate widget provider file. Place it in xml resource folder.
+```xml
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minResizeWidth="40dp"
+    android:minHeight="60dp"
+    android:initialLayout="@layout/widget4x1"
+    android:resizeMode="horizontal"
+    android:widgetCategory="home_screen"/>
 ```
-Interface describing requests to Retrofit
-```markdown
-interface OpenWeatherService{
+Each widget must define a *minWidth* and *minHeight*, indicating the minimum amount of space it should consume by default. When users add a widget to their Home screen, it will generally occupy more than the minimum width and height you specify. When your widget is added, it will be stretched to occupy the minimum number of cells, horizontally and vertically, required to satisfy its *minWidth* and *minHeight* constraints. 
 
-    /*
-    * Current weather
-    * https://api.openweathermap.org/data/2.5/weather?appid=<<api_key>>&units={metric/imperial}
-    *
-    * &q={city name},{country code} - by city name
-    * &id={city id} - by city id
-    * &lat={lat}&lon={lon} - by coords
-    * &zip={zip code},{country code} - by zip code
-    * {
-        "cod":200
-        "id":2172797,
-        "name":"Cairns",
-        "dt":1435658272,
-        "coord":{
-            "lon":145.77,"lat":-16.92
-         },
-        "weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],
-        "base":"cmc stations",
-        "main":{"temp":293.25,"pressure":1019,"humidity":83,"temp_min":289.82,"temp_max":295.37},
-        "wind":{"speed":5.1,"deg":150},
-        "clouds":{"all":75},
-        "rain":{"3h":3},
-        "sys":{"type":1,"id":8166,"message":0.0166,"country":"AU","sunrise":1435610796,"sunset":1435650870},
-      }
-    */
-    @GET("/data/2.5/weather")
-    fun getCurrentWeather(@QueryMap map: Map<String, String>): Call<CurrentWeatherResponse>
-}
-```
+While the width and height of a cell—as well as the amount of automatic margins applied to widgets—may vary across devices, you can use the table below to roughly estimate your widget's minimum dimensions, given the desired number of occupied grid cells:
 
-Classes to initialize Retrofit and make requests
-```markdown
-class Requester {
-    private val service: OpenWeatherService
+№ of Cells (Columns or Rows) | Available Size (dp) (minWidth or minHeight)
+-----------------------------| -------------------------------------------
+1 | 40dp
+2 | 110dp
+3 | 180dp
+4 | 250dp
+... | ...
+n | 70 × n − 30
 
-    companion object {
-        const val BASE_URL = "https://api.openweathermap.org"
-        const val APPKEY_PARAM = "appid"
+## Step 3: WidgetProvider class
 
-        const val UNITS_PARAM = "units"
-        const val CITY_NAME_PARAM = "q"
-        const val CITY_ID_PARAM = "id"
-        const val LAT_PARAM = "lat"
-        const val LON_PARAM = "lon"
-        const val ZIP_PARAM = "zip"
-    }
+The AppWidgetProvider class extends BroadcastReceiver, but receives only the event broadcasts that are relevant to the App Widget, such as when the App Widget is updated, deleted, enabled, and disabled. When these broadcast events occur, the AppWidgetProvider receives the corresponding method calls. Thus onReceive() method is called for every broadcast and before each of the callback methods. AppWidgetProvider class implementation must be declared as a broadcast receiver using the <receiver> element in the AndroidManifest (Step 4)
+    
+**onUpdate()** is the most important callback method, because it's called to update the App Widget at intervals defined by the *updatePeriodMillis* attribute in the AppWidgetProviderInfo. This method is also called when the user adds the App Widget, so it should perform the essential setup, such as define event handlers for Views and start a temporary Service, if necessary. However, if you have declared a configuration Activity, this method is not called when the user adds the App Widget, but is called for the subsequent updates. It is the responsibility of the configuration Activity to perform the first update when configuration is done
 
-    init {
-        val gson = GsonBuilder()
-            .create()
-        val client = OkHttpClient().newBuilder()
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
-            })
-            .addInterceptor(ErrorInterceptor())
-            .addInterceptor(ApiKeyInterceptor())
-            .build()
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .client(client)
-            .build()
-        service = retrofit.create(OpenWeatherService::class.java)
-    }
-
-    fun getCurrentWeatherByCityName(city: String): Call<CurrentWeatherResponse>{
-        val map = mutableMapOf<String, String>()
-        map[CITY_NAME_PARAM] = city
-        map[UNITS_PARAM] = "metric"
-
-        return service.getCurrentWeather(map)
-    }
-}
-
-class ApiKeyInterceptor: Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val originalR = chain.request()
-        val originalH = originalR.url()
-        val url = originalH.newBuilder()
-            .addQueryParameter(APPKEY_PARAM, BuildConfig.OPEN_WEATHER_API_KEY)
-            .build()
-        val requestBuilder = originalR.newBuilder().url(url).build()
-        return chain.proceed(requestBuilder)
-    }
-}
-
-class ErrorInterceptor: Interceptor{
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val originalR = chain.request()
-        val response = chain.proceed(originalR)
-        return if (response.code() == 200) response
-        else{
-            Log.e(javaClass.name, response.code().toString())
-
-            response
+Instead of using **onUpdate()** callback we might use **onReceive()** just as in any BroadcastReceiver
+```kotlin
+override fun onReceive(context: Context?, intent: Intent?) {
+        super.onReceive(context, intent)
+        if (AppWidgetManager.ACTION_APPWIDGET_UPDATE == intent?.action) {
+            val pb = intent.getBooleanExtra(PROGRESS_BAR_EXTRA, false)
+            update(context, pb)
         }
     }
-}
 ```
-#Widget
 
-Step 1: layout
-Step 2: WidgetProvider class
+In this code snippet our **update()** function makes all magic
+```kotlin
+private fun update(context: Context?, pb: Boolean){
+        val appWidgetIds = AppWidgetManager.getInstance(context)
+            .getAppWidgetIds(ComponentName(context, WidgetProvider::class.java)) ?: return
 
-Step N: Create Widget Preview
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+
+        val sp = PreferenceManager.getDefaultSharedPreferences(context)
+        val cityName = sp.getString(context?.getString(R.string.pref_city_name_key), "")
+        val icon = getIconResourceForWeatherCondition(sp.getInt(context?.getString(R.string.pref_weather_icon_key), -1))
+        val temperature = sp.getFloat(context?.getString(R.string.pref_temperature_key), 0.0f)
+        val pressure = sp.getFloat(context?.getString(R.string.pref_pressure_key), 0.0f)
+        val windSpeed =  sp.getFloat(context?.getString(R.string.pref_wind_speed_key), 0.0f)
+        val windDirection = sp.getFloat(context?.getString(R.string.pref_wind_direction_key), 0.0f)
+        val clouds = sp.getFloat(context?.getString(R.string.pref_clouds_key), 0.0f)
+        val date = sp.getLong(context?.getString(R.string.pref_date_key), -1)
+
+        for (widgetId in appWidgetIds) {
+            val remoteViews = RemoteViews(context?.packageName, R.layout.widget4x1)
+
+            remoteViews.setTextViewText(R.id.tvDate, formattedDate(date))
+            remoteViews.setTextViewText(R.id.tvCityName, cityName)
+            remoteViews.setTextViewText(R.id.tvTemperature, formattedTemperature(context, temperature))
+            remoteViews.setTextViewText(R.id.tvPressure, formattedPressure(context, pressure))
+            remoteViews.setTextViewText(R.id.tvWind, formattedWind(context, windSpeed, windDirection))
+            remoteViews.setTextViewText(R.id.tvCloudiness, formattedCloudiness(context, clouds))
+            if(icon != -1) remoteViews.setImageViewResource(R.id.ivWeatherIcon, icon)
+
+            if (pb) {
+                remoteViews.setViewVisibility(R.id.pbWidgetRefresh, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.ivRefresh, View.INVISIBLE)
+            } else {
+                remoteViews.setViewVisibility(R.id.ivRefresh, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.pbWidgetRefresh, View.INVISIBLE)
+
+                val refreshIntent = Intent(context, WidgetProvider::class.java)
+                refreshIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                refreshIntent.putExtra(PROGRESS_BAR_EXTRA, true)
+                val refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, 0)
+                remoteViews.setOnClickPendingIntent(R.id.ivRefresh, refreshPendingIntent)
+            }
+
+            appWidgetManager.updateAppWidget(widgetId, remoteViews)
+        }
+    }
+ ```
+ 
+ In this function we update all view vidgets and set ClickListener at one of them through PendingIntent
+ 
+## Step 4: Declaring Widget in AndroidManifest
+
+```xml
+<receiver android:name=".service.WidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/widget_info"/>
+        </receiver>
+```
+
+The **<intent-filter>** element must include an <action> element with the *android:name* attribute, which specifies that the AppWidgetProvider accepts the ACTION_APPWIDGET_UPDATE broadcast. This is the only broadcast that you must explicitly declare. The AppWidgetManager automatically sends all other App Widget broadcasts to the AppWidgetProvider as necessary. The **<meta-data>** element specifies the AppWidgetProviderInfo resource and requires.
+
+Each widget in an application needs its own declaration in AndroidManifest
+
+## Step 5: Create Widget Preview
+
 Android emulators include an application called "Widget Preview". To create a preview image, launch this application, select the app widget for your application. Then take a snapshot. To save it on your computer, run next command:
-    adb pull sdcard/Download/{name_of_snapshot}.png {path_on_computer}
-After that you need to place it to application's drawable resources
+> adb pull sdcard/Download/{name_of_snapshot}.png {path_on_computer}
+
+After that you need to place it to application's drawable resources and add it to widget layout
+
+> android:previewImage="@drawable/preview"
+
+#### Other links
+
+- [Build an App Widget](https://developer.android.com/guide/topics/appwidgets/)
+- [App Widget Design Guidelines](https://developer.android.com/guide/practices/ui_guidelines/widget_design)
