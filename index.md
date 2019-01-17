@@ -154,24 +154,24 @@ private fun update(context: Context?, pb: Boolean){
 }
  ```
  
- In this function we update all view vidgets and set ClickListener at one of them through PendingIntent
+ In this function we update all view vidgets and set ClickListener at one of them with PendingIntent
  
 ## Step 4: Declaring Widget in AndroidManifest
 
 ```xml
 <receiver android:name=".service.WidgetProvider">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-            </intent-filter>
-            <meta-data
-                    android:name="android.appwidget.provider"
-                    android:resource="@xml/widget_info"/>
-        </receiver>
+	<intent-filter>
+		<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+	</intent-filter>
+	<meta-data
+			android:name="android.appwidget.provider"
+			android:resource="@xml/widget_info"/>
+</receiver>
 ```
 
-The **<intent-filter>** element must include an <action> element with the *android:name* attribute, which specifies that the AppWidgetProvider accepts the ACTION_APPWIDGET_UPDATE broadcast. This is the only broadcast that you must explicitly declare. The AppWidgetManager automatically sends all other App Widget broadcasts to the AppWidgetProvider as necessary. The **<meta-data>** element specifies the AppWidgetProviderInfo resource and requires.
+The ** <intent-filter> ** element must include an <action> element with the * android:name * attribute, which specifies that the AppWidgetProvider accepts the ACTION_APPWIDGET_UPDATE broadcast. This is the only broadcast that you must explicitly declare. The AppWidgetManager automatically sends all other App Widget broadcasts to the AppWidgetProvider as necessary. The ** <meta-data> ** element specifies the AppWidgetProviderInfo resource and requires.
 
-Each widget in an application needs its own declaration in AndroidManifest
+Each widget in an application needs its own declaration in AndroidManifest and AppWidgetProvider class
 
 ## Step 5: Create Widget Preview
 

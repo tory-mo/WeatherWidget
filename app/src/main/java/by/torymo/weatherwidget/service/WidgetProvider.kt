@@ -24,10 +24,10 @@ class WidgetProvider: AppWidgetProvider() {
         super.onReceive(context, intent)
         if (AppWidgetManager.ACTION_APPWIDGET_UPDATE == intent?.action) {
             val pb = intent.getBooleanExtra(PROGRESS_BAR_EXTRA, false)
-            if (pb) {
-                uploadData(context)
-            }
+            if (pb) uploadData(context)
             update(context, pb)
+        }else if(AppWidgetManager.ACTION_APPWIDGET_ENABLED == intent?.action){
+            uploadData(context)
         }
     }
 
