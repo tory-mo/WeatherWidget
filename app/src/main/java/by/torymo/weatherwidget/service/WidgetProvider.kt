@@ -10,20 +10,52 @@ import android.widget.RemoteViews
 import by.torymo.weatherwidget.*
 import android.app.PendingIntent
 import android.view.View
-
-
-
+import android.app.AlarmManager
+import android.os.Build
+import android.content.Context.ALARM_SERVICE
 
 class WidgetProvider: AppWidgetProvider() {
 
     companion object {
         const val PROGRESS_BAR_EXTRA = "pbex"
     }
+
     override fun onReceive(context: Context?, intent: Intent?) {
         super.onReceive(context, intent)
         if (AppWidgetManager.ACTION_APPWIDGET_UPDATE == intent?.action) {
             val pb = intent.getBooleanExtra(PROGRESS_BAR_EXTRA, false)
+            if (pb) {
+                uploadData(context)
+            }
             update(context, pb)
+        }
+    }
+
+    private fun uploadData(context: Context?){
+        val alarm = context?.applicationContext?.getSystemService(ALARM_SERVICE) as AlarmManager? ?: return
+        val updaterIntent = Intent(context?.applicationContext, WeatherSyncService::class.java)
+
+        val pi = PendingIntent.getService(
+            context?.applicationContext,
+            0,
+            updaterIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT
+        )
+        alarm.cancel(pi)
+
+        val nextAlarm = System.currentTimeMillis()
+        when{
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarm, pi)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> alarm.setExact(
+                AlarmManager.RTC_WAKEUP,
+                nextAlarm,
+                pi
+            )
+            else -> alarm.set(
+                AlarmManager.RTC_WAKEUP,
+                nextAlarm,
+                pi
+            )
         }
     }
 

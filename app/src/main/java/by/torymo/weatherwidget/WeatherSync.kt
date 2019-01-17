@@ -41,13 +41,13 @@ class WeatherSyncService: IntentService("WeatherWidget"){
                         editor.putFloat(getString(R.string.pref_clouds_key), it.clouds.all)
                         editor.putLong(getString(R.string.pref_date_key), it.dt*1000L)
                         editor.apply()
-
-                        notifyWidget(ctx, true)
                     }
                 }
+                notifyWidget(ctx, false)
             }
 
             override fun onFailure(call: Call<CurrentWeatherResponse>, t: Throwable) {
+                notifyWidget(ctx, false)
             }
         })
     }
