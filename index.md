@@ -15,15 +15,15 @@ def okhttpVersion = '3.9.1'
 implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
 implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 ```
-Classes to handle JSON Responses automatically with Gson: [Responses.kt](app/src/main/java/by/torymo/weatherwidget/service/Responses.kt)
+Classes to handle JSON Responses automatically with Gson: [Responses.kt](Responses.kt)
 
-Interface describing requests to Retrofit: [OpenWeatherService.kt](app/src/main/java/by/torymo/weatherwidget/service/OpenWeatherService.kt)
+Interface describing requests to Retrofit: [OpenWeatherService.kt](OpenWeatherService.kt)
 
-Classes to initialize Retrofit and make requests: [Requester.kt](app/src/main/java/by/torymo/weatherwidget/service/Requester.kt)
+Classes to initialize Retrofit and make requests: [Requester.kt](Requester.kt)
 
-Service to receive data: [Requester.kt](app/src/main/java/by/torymo/weatherwidget/WeatherSyncService.kt)
+Service to receive data: [Requester.kt](WeatherSyncService.kt)
 
-Utility functions: [util.kt](app/src/main/java/by/torymo/weatherwidget/util.kt)
+Utility functions: [util.kt](util.kt)
 
 # Widget
 
@@ -79,6 +79,7 @@ override fun onReceive(context: Context?, intent: Intent?) {
 The code snippet above calls two functions: 
  - **update()** function, which makes all the magic with widget appearance and behavior
  - **uploadData()** function, which calls Service updating weather data
+ 
 ```kotlin
 private fun uploadData(context: Context?){
 	val alarm = context?.applicationContext?.getSystemService(ALARM_SERVICE) as AlarmManager? ?: return
@@ -160,12 +161,12 @@ private fun update(context: Context?, pb: Boolean){
 
 ```xml
 <receiver android:name=".service.WidgetProvider">
-	<intent-filter>
-		<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-	</intent-filter>
-	<meta-data
-			android:name="android.appwidget.provider"
-			android:resource="@xml/widget_info"/>
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+    </intent-filter>
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_info"/>
 </receiver>
 ```
 
