@@ -15,15 +15,15 @@ def okhttpVersion = '3.9.1'
 implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
 implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 ```
-Classes to handle JSON Responses automatically with Gson: [Responses.kt](Responses.kt)
+Classes to handle JSON Responses automatically with Gson: [Responses.kt](https://github.com/tory-mo/WeatherWidget/tree/master/app/src/main/java/by/torymo/weatherwidget/service/Responses.kt)
 
-Interface describing requests to Retrofit: [OpenWeatherService.kt](OpenWeatherService.kt)
+Interface describing requests to Retrofit: [OpenWeatherService.kt](app/src/main/java/by/torymo/weatherwidget/service/OpenWeatherService.kt)
 
-Classes to initialize Retrofit and make requests: [Requester.kt](Requester.kt)
+Classes to initialize Retrofit and make requests: [Requester.kt](https://github.com/tory-mo/WeatherWidget/tree/master/app/src/main/java/by/torymo/weatherwidget/service/Requester.kt)
 
-Service to receive data: [Requester.kt](WeatherSyncService.kt)
+Service to receive data: [Requester.kt](https://github.com/tory-mo/WeatherWidget/tree/master/app/src/main/java/by/torymo/weatherwidget/WeatherSyncService.kt)
 
-Utility functions: [util.kt](util.kt)
+Utility functions: [util.kt](https://github.com/tory-mo/WeatherWidget/tree/master/app/src/main/java/by/torymo/weatherwidget/util.kt)
 
 # Widget
 
