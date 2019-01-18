@@ -45,7 +45,7 @@ fun formattedTemperature(context: Context?, temperature: Float): String{
 
 fun formattedPressure(context: Context?, pressure: Float): String{
     if(context == null) return ""
-    return context.getString(R.string.format_pressure, pressure)
+    return context.getString(R.string.format_pressure, Math.round(pressure))
 }
 
 fun formattedWind(context: Context?, windSpeed: Float, windDirection: Float): String{
@@ -58,7 +58,7 @@ fun formattedCloudiness(context: Context?, cloudiness: Float): String{
     return context.getString(R.string.format_cloudiness, Math.round(cloudiness))
 }
 
-fun formattedDate(date: Long): String{
-    if(date == -1L) return ""
-    return SimpleDateFormat("dd MMM yyyy HH:mm").format(date)
+fun formattedDate(context: Context?, date: Long): String{
+    if(context == null || date == -1L) return ""
+    return context.getString(R.string.format_updated,  SimpleDateFormat("dd MMM yyyy HH:mm").format(date))
 }

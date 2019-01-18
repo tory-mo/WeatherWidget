@@ -23,14 +23,12 @@
     <string name="wind_direction_s" translatable="true">S</string>
     <string name="wind_direction_e" translatable="true">E</string>
 
-    <string name="format_temperature"><xliff:g id="temp">%d</xliff:g>\u00B0C
-    </string>
-    <string name="format_pressure" translatable="true">Pressure: <xliff:g id="pressure">%.1f</xliff:g> hPa
-    </string>
-    <string name="format_wind" translatable="true">Wind: <xliff:g id="wind">%d</xliff:g> mph,
-        <xliff:g id="direction">%s</xliff:g>
-    </string>
-    <string name="format_cloudiness" translatable="true">Cloudiness: <xliff:g id="cloudiness">%d</xliff:g>%%
-    </string>
+    <string name="format_temperature"><xliff:g id="temp">%d</xliff:g>\u00B0C</string>
+    <string name="format_pressure" translatable="true">Pressure: <xliff:g id="pressure">%d</xliff:g> hPa</string>
+    <string name="format_wind" translatable="true">Wind: <xliff:g id="wind">%d</xliff:g> mph, <xliff:g id="direction">%s</xliff:g></string>
+    <string name="format_cloudiness" translatable="true">Cloudiness: <xliff:g id="cloudiness">%d</xliff:g>%%</string>
+    <string name="format_updated">Updated: <xliff:g id="date">%s</xliff:g></string>
+
+    <string name="refresh">Refresh</string>
 
 </resources>

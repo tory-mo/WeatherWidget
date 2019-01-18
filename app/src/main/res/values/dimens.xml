@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="widget_padding">4dp</dimen>
+    <dimen name="widget_refresh_size">14dp</dimen>
+    <dimen name="widget_updated_textSize">10sp</dimen>
+    <dimen name="widget_location_textSize">14sp</dimen>
+    <dimen name="widget_weather_icon_marginVertical">4dp</dimen>
+
+    <!--widget 4x1-->
+    <dimen name="widget4x1_weather_icon_size">56dp</dimen>
+    <dimen name="widget4x1_info_textSize">14sp</dimen>
+    <dimen name="widget4x1_temperature_textSize">36sp</dimen>
+    <dimen name="widget4x1_temperature_marginHorizontal">20dp</dimen>
+
+    <!--widget 3x1-->
+    <dimen name="widget3x1_weather_icon_size">48dp</dimen>
+    <dimen name="widget3x1_info_textSize">12sp</dimen>
+    <dimen name="widget3x1_temperature_textSize">28sp</dimen>
+    <dimen name="widget3x1_temperature_marginHorizontal">10dp</dimen>
+
+    <!--widget 1x1-->
+    <dimen name="widget1x1_temperature_textSize">18sp</dimen>
+    <dimen name="widget1x1_location_textSize">10sp</dimen>
+
+</resources>

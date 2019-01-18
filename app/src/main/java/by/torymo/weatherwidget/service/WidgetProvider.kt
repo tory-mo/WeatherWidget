@@ -14,6 +14,8 @@ import android.app.AlarmManager
 import android.os.Build
 import android.content.Context.ALARM_SERVICE
 
+
+
 class WidgetProvider: AppWidgetProvider() {
 
     companion object {
@@ -22,7 +24,7 @@ class WidgetProvider: AppWidgetProvider() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         super.onReceive(context, intent)
-        if (AppWidgetManager.ACTION_APPWIDGET_UPDATE == intent?.action) {
+        if (AppWidgetManager.ACTION_APPWIDGET_UPDATE == intent?.action || AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED == intent?.action) {
             val pb = intent.getBooleanExtra(PROGRESS_BAR_EXTRA, false)
             if (pb) uploadData(context)
             update(context, pb)
@@ -76,9 +78,13 @@ class WidgetProvider: AppWidgetProvider() {
         val date = sp.getLong(context?.getString(R.string.pref_date_key), -1)
 
         for (widgetId in appWidgetIds) {
-            val remoteViews = RemoteViews(context?.packageName, R.layout.widget4x1)
+            val options = appWidgetManager.getAppWidgetOptions(widgetId)
+            val widgetWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+            val widgetHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
 
-            remoteViews.setTextViewText(R.id.tvDate, formattedDate(date))
+            val remoteViews = getRemoteViews(context, widgetWidth, widgetHeight)
+
+            remoteViews.setTextViewText(R.id.tvDate, formattedDate(context, date))
             remoteViews.setTextViewText(R.id.tvCityName, cityName)
             remoteViews.setTextViewText(R.id.tvTemperature, formattedTemperature(context, temperature))
             remoteViews.setTextViewText(R.id.tvPressure, formattedPressure(context, pressure))
@@ -98,9 +104,27 @@ class WidgetProvider: AppWidgetProvider() {
                 refreshIntent.putExtra(PROGRESS_BAR_EXTRA, true)
                 val refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, 0)
                 remoteViews.setOnClickPendingIntent(R.id.ivRefresh, refreshPendingIntent)
+                remoteViews.setOnClickPendingIntent(R.id.tvCityName, refreshPendingIntent)
             }
 
             appWidgetManager.updateAppWidget(widgetId, remoteViews)
         }
+    }
+
+    private fun getRemoteViews(context: Context?, width: Int, height: Int): RemoteViews{
+        val cells = getCells(width)
+        return when(cells){
+            1 -> RemoteViews(context?.packageName, R.layout.widget1x1)
+            2 -> RemoteViews(context?.packageName, R.layout.widget2x1)
+            3 -> RemoteViews(context?.packageName, R.layout.widget3x1)
+            else -> RemoteViews(context?.packageName, R.layout.widget4x1)
+        }
+    }
+
+    //those numbers from developer.android.com
+    private fun getCells(size: Int): Int {
+        var n = 2
+        while (70 * n - 30 < size) n++
+        return n - 1
     }
 }

@@ -33,7 +33,7 @@
         android:visibility="invisible"/>
     <ImageView
         android:id="@+id/ivWeatherIcon"
-        android:layout_width="@dimen/widget4x1_weather_icon_size"
+        android:layout_width="@dimen/widget3x1_weather_icon_size"
         android:layout_height="match_parent"
         android:layout_below="@id/tvCityName"
         android:layout_above="@id/tvDate"
@@ -44,7 +44,7 @@
         android:id="@+id/tvTemperature"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:textSize="@dimen/widget4x1_temperature_textSize"
+        android:textSize="@dimen/widget3x1_temperature_textSize"
         android:layout_below="@id/tvCityName"
         android:layout_toEndOf="@id/ivWeatherIcon"
         android:layout_above="@id/tvDate"
@@ -64,7 +64,7 @@
             android:id="@+id/tvWind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/widget4x1_info_textSize"
+            android:textSize="@dimen/widget3x1_info_textSize"
             android:maxLines="1"
             android:ellipsize="end"
             tools:text="Wind: 2 mph, NW"/>
@@ -72,7 +72,7 @@
             android:id="@+id/tvPressure"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/widget4x1_info_textSize"
+            android:textSize="@dimen/widget3x1_info_textSize"
             android:maxLines="1"
             android:ellipsize="end"
             tools:text="Pressure: 1000 hPa"/>
@@ -80,7 +80,7 @@
             android:id="@+id/tvCloudiness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/widget4x1_info_textSize"
+            android:textSize="@dimen/widget3x1_info_textSize"
             android:maxLines="1"
             android:ellipsize="end"
             tools:text="Cloudiness: 80%"/>
@@ -90,7 +90,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="@dimen/widget_updated_textSize"
-        android:maxLines="1"
-        android:ellipsize="end"
         android:layout_alignParentBottom="true"/>
 </RelativeLayout>

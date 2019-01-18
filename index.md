@@ -169,11 +169,48 @@ private fun update(context: Context?, pb: Boolean){
 </receiver>
 ```
 
-The ** <intent-filter> ** element must include an <action> element with the * android:name * attribute, which specifies that the AppWidgetProvider accepts the ACTION_APPWIDGET_UPDATE broadcast. This is the only broadcast that you must explicitly declare. The AppWidgetManager automatically sends all other App Widget broadcasts to the AppWidgetProvider as necessary. The ** <meta-data> ** element specifies the AppWidgetProviderInfo resource and requires.
+The <intent-filter> element must include an <action> element with the android:name attribute, which specifies that the AppWidgetProvider accepts the ACTION_APPWIDGET_UPDATE broadcast. This is the only broadcast that you must explicitly declare. The AppWidgetManager automatically sends all other App Widget broadcasts to the AppWidgetProvider as necessary. The <meta-data> element specifies the AppWidgetProviderInfo resource and requires.
 
 Each widget in an application needs its own declaration in AndroidManifest and AppWidgetProvider class
 
-## Step 5: Create Widget Preview
+## Step 5: Make resized widget appearance change
+
+When widget is resized, some of its elements might be shown in an inapropriate way. To prevent it, we might provide different layut views for non-default sizes of our widget.
+
+First, layouts must be created for each available size. In case of WeatherWidget, layout widget info xml file says, that default widget must be 4x1 cells (android:minWidth="250dp" android:minHeight="60dp") and can be resized to 1x1 cell (android:minResizeWidth="40dp"), so we need 3 more layout files for smaller sizes.
+
+To make those resize changes applied, there are supposed to be made changes in WidgetProvider class: it must react on **onAppWidgetOptionsChanged()** callback which is called when the widget is first placed and any time the widget is resized. There are two ways to get those callbacks: using **onAppWidgetOptionsChanged()** callback or check it in **onReceive()**
+
+ The basic logic is next: determine size of the widget and provide corresponding layout file for RemoteViews. There are two functions helping obtain the right layout in the next code snippet
+```kotlin
+private fun getRemoteViews(context: Context?, width: Int, height: Int): RemoteViews{
+	val cells = getCells(width)
+	return when(cells){
+		1 -> RemoteViews(context?.packageName, R.layout.widget1x1)
+		2 -> RemoteViews(context?.packageName, R.layout.widget2x1)
+		3 -> RemoteViews(context?.packageName, R.layout.widget3x1)
+		else -> RemoteViews(context?.packageName, R.layout.widget4x1)
+	}
+}
+
+//those numbers from developer.android.com
+private fun getCells(size: Int): Int {
+	var n = 2
+	while (70 * n - 30 < size) n++
+	return n - 1
+}
+```
+
+**update()** function is appended with next code lines:
+```kotlin
+val options = appWidgetManager.getAppWidgetOptions(widgetId)
+val widgetWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+val widgetHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+
+val remoteViews = getRemoteViews(context, widgetWidth, widgetHeight)
+```
+
+## Step 6: Create Widget Preview
 
 Android emulators include an application called "Widget Preview". To create a preview image, launch this application, select the app widget for your application. Then take a snapshot. To save it on your computer, run next command:
 > adb pull sdcard/Download/{name_of_snapshot}.png {path_on_computer}
