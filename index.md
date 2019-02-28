@@ -196,9 +196,7 @@ private fun getRemoteViews(context: Context?, width: Int, height: Int): RemoteVi
 
 //those numbers from developer.android.com
 private fun getCells(size: Int): Int {
-	var n = 2
-	while (70 * n - 30 < size) n++
-	return n - 1
+	return Math.floor(((size + 30) / 70).toDouble()).toInt()
 }
 ```
 
@@ -219,6 +217,67 @@ Android emulators include an application called "Widget Preview". To create a pr
 After that you need to place it to application's drawable resources and add it to widget layout
 
 > android:previewImage="@drawable/preview"
+
+## Step 7: App Widget Configuration Activity
+
+The configuration Activity should be declared as a normal Activity in the Android manifest file. However, it will be launched by the App Widget host with the ACTION_APPWIDGET_CONFIGURE action, so the Activity needs to accept this Intent
+
+```xml
+<activity android:name=".WidgetConfigActivity">
+	<intent-filter>
+		<action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+	</intent-filter>
+</activity>
+```
+
+Also, this Activity must be declared in the AppWidgetProviderInfo XML file, with the **android:configure**. Notice that the Activity is declared with a fully-qualified namespace, because it will be referenced from outside the package scope
+
+```xml
+...
+android:configure="by.torymo.weatherwidget.WidgetConfigActivity"
+...
+```
+
+There are two important things to remember when you implement the configuration Activity:
+ - The configuration Activity should **always return a result**. The result should include the **App Widget ID** passed by the Intent that launched the Activity (saved in the Intent extras as EXTRA_APPWIDGET_ID).
+ - The the system **will not send the ACTION_APPWIDGET_UPDATE** broadcast when a configuration Activity is launched. It is the responsibility of the configuration Activity to request an update from the AppWidgetManager when the App Widget is first created. However, onUpdate() will be called for subsequent updates.
+ 
+First thing to do in configuration activity is to get id of the widget. Without it it's impossible accept settings to appropriate widget
+
+```kotlin
+val extras = intent.extras
+	if (extras != null) {
+		appWidgetId = extras.getInt(
+			AppWidgetManager.EXTRA_APPWIDGET_ID,
+			AppWidgetManager.INVALID_APPWIDGET_ID)
+	}
+```
+
+When all confugurations are done, it's time to apply changes and update widget. Remember, that there must be called widget update
+
+```kotlin
+private fun showAppWidget() {
+	//If the intent doesn’t have a widget ID, then call finish()//
+	if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+		finish()
+	}
+
+	//Perform the configuration and get an instance of the AppWidgetManager//
+	val sp = PreferenceManager.getDefaultSharedPreferences(this)
+	val editor = sp.edit()
+
+	editor.putBoolean(getString(R.string.widget_background_pref_key), whiteTheme)
+	editor.putInt(getString(R.string.widget_transparency_pref_key), sbWidgetTransparency.progress)
+	editor.apply()
+
+	val resultValue = Intent()
+	resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+	setResult(RESULT_OK, resultValue)
+	finish()
+}
+```
+
+Code of updating function in WidgetProvider must be changed in a way to use and apply changing parameters of the widget.
 
 #### Other links
 

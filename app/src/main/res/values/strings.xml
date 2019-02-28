@@ -1,5 +1,6 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
-    <string name="app_name">WeatherWidget</string>
+    <string name="app_name">Weather Widget</string>
+    <string name="widget_config_title">Weather Widget Configuration</string>
 
 
     <string name="pref_city_id_key">city_id_key</string>
@@ -23,12 +24,41 @@
     <string name="wind_direction_s" translatable="true">S</string>
     <string name="wind_direction_e" translatable="true">E</string>
 
-    <string name="format_temperature"><xliff:g id="temp">%d</xliff:g>\u00B0C</string>
-    <string name="format_pressure" translatable="true">Pressure: <xliff:g id="pressure">%d</xliff:g> hPa</string>
-    <string name="format_wind" translatable="true">Wind: <xliff:g id="wind">%d</xliff:g> mph, <xliff:g id="direction">%s</xliff:g></string>
-    <string name="format_cloudiness" translatable="true">Cloudiness: <xliff:g id="cloudiness">%d</xliff:g>%%</string>
-    <string name="format_updated">Updated: <xliff:g id="date">%s</xliff:g></string>
+    <string name="format_temperature"><xliff:g id="temp">%d</xliff:g>\u00B0C
+    </string>
+    <string name="format_pressure" translatable="true">Pressure: <xliff:g id="pressure">%d</xliff:g> hPa
+    </string>
+    <string name="format_wind" translatable="true">Wind: <xliff:g id="wind">%d</xliff:g> mph,
+        <xliff:g id="direction">%s</xliff:g>
+    </string>
+    <string name="format_cloudiness" translatable="true">Cloudiness: <xliff:g id="cloudiness">%d</xliff:g>%%
+    </string>
+    <string name="format_updated">Updated:
+        <xliff:g id="date">%s</xliff:g>
+    </string>
 
     <string name="refresh">Refresh</string>
+    <string name="create_widget">Create widget</string>
+    <string name="widget_background_settings">White background</string>
+    <string name="widget_transparency_settings">Transparency</string>
+
+
+    <string name="widget_transparency_pref_key">pref_transparency</string>
+    <string name="widget_transparency_pref_default">128</string>
+
+    <string name="widget_background_pref_key">pref_background</string>
+    <string name="widget_background_pref_default">false</string>
+
+
+
+    <string name="widget_preview_default_temperature">12</string>
+    <string name="widget_preview_default_city">Minsk</string>
+    <string name="widget_preview_default_icon">800</string>
+    <string name="widget_preview_default_pressure">991</string>
+    <string name="widget_preview_default_windSpeed">1</string>
+    <string name="widget_preview_default_windDirection">160</string>
+    <string name="widget_preview_default_clouds">3</string>
+
+
 
 </resources>

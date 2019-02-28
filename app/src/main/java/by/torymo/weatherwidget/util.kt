@@ -1,7 +1,9 @@
 package by.torymo.weatherwidget
 
 import android.content.Context
+import android.preference.PreferenceManager
 import java.text.SimpleDateFormat
+import java.util.*
 
 fun getWindDirectionShort(context: Context?, degrees: Float): String {
     if(context == null) return ""
@@ -36,29 +38,60 @@ fun getIconResourceForWeatherCondition(weatherId: Int): Int {
     }
 }
 
-fun formattedTemperature(context: Context?, temperature: Float): String{
-    if(context == null) return ""
-    val temp = context.getString(R.string.format_temperature, Math.round(temperature))
-    if(temperature > 0) return String.format("+%s", temp)
-    return temp
-}
 
-fun formattedPressure(context: Context?, pressure: Float): String{
-    if(context == null) return ""
-    return context.getString(R.string.format_pressure, Math.round(pressure))
-}
 
-fun formattedWind(context: Context?, windSpeed: Float, windDirection: Float): String{
-    if(context == null) return ""
-    return context.getString(R.string.format_wind, Math.round(windSpeed), getWindDirectionShort(context, windDirection))
-}
+data class WidgetData(val context: Context?, val withDefaults: Boolean = false){
+    private val sp = PreferenceManager.getDefaultSharedPreferences(context)
 
-fun formattedCloudiness(context: Context?, cloudiness: Float): String{
-    if(context == null) return ""
-    return context.getString(R.string.format_cloudiness, Math.round(cloudiness))
-}
+    val cityName: String = sp.getString(context?.getString(R.string.pref_city_name_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_city)?: "" else "") ?: ""
 
-fun formattedDate(context: Context?, date: Long): String{
-    if(context == null || date == -1L) return ""
-    return context.getString(R.string.format_updated,  SimpleDateFormat("dd MMM yyyy HH:mm").format(date))
+    val icon = getIconResourceForWeatherCondition(sp.getInt(context?.getString(R.string.pref_weather_icon_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_icon)?.toInt()?:-1 else -1))
+
+    private val temperature = sp.getFloat(context?.getString(R.string.pref_temperature_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_temperature)?.toFloat()?:0.0f else 0.0f)
+
+    private val pressure = sp.getFloat(context?.getString(R.string.pref_pressure_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_pressure)?.toFloat()?:0.0f else 0.0f)
+
+    private val windSpeed =  sp.getFloat(context?.getString(R.string.pref_wind_speed_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_windSpeed)?.toFloat()?:0.0f else 0.0f)
+
+    private val windDirection = sp.getFloat(context?.getString(R.string.pref_wind_direction_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_windDirection)?.toFloat()?:0.0f else 0.0f)
+
+    private val clouds = sp.getFloat(context?.getString(R.string.pref_clouds_key),
+        if(withDefaults) context?.getString(R.string.widget_preview_default_clouds)?.toFloat()?:0.0f else 0.0f)
+
+    private val date = sp.getLong(context?.getString(R.string.pref_date_key),
+        if(withDefaults) Date().time else -1)
+
+
+    fun formattedTemperature(): String{
+        if(context == null) return ""
+        val temp = context.getString(R.string.format_temperature, Math.round(temperature))
+        if(temperature > 0) return String.format("+%s", temp)
+        return temp
+    }
+
+    fun formattedPressure(): String{
+        if(context == null) return ""
+        return context.getString(R.string.format_pressure, Math.round(pressure))
+    }
+
+    fun formattedWind(): String{
+        if(context == null) return ""
+        return context.getString(R.string.format_wind, Math.round(windSpeed), getWindDirectionShort(context, windDirection))
+    }
+
+    fun formattedCloudiness(): String{
+        if(context == null) return ""
+        return context.getString(R.string.format_cloudiness, Math.round(clouds))
+    }
+
+    fun formattedDate(): String{
+        if(context == null || date == -1L) return ""
+        return context.getString(R.string.format_updated,  SimpleDateFormat("dd MMM yyyy HH:mm").format(date))
+    }
 }

@@ -13,7 +13,7 @@ import android.view.View
 import android.app.AlarmManager
 import android.os.Build
 import android.content.Context.ALARM_SERVICE
-
+import android.graphics.Color
 
 
 class WidgetProvider: AppWidgetProvider() {
@@ -67,15 +67,10 @@ class WidgetProvider: AppWidgetProvider() {
 
         val appWidgetManager = AppWidgetManager.getInstance(context)
 
+        val wd = WidgetData(context)
         val sp = PreferenceManager.getDefaultSharedPreferences(context)
-        val cityName = sp.getString(context?.getString(R.string.pref_city_name_key), "")
-        val icon = getIconResourceForWeatherCondition(sp.getInt(context?.getString(R.string.pref_weather_icon_key), -1))
-        val temperature = sp.getFloat(context?.getString(R.string.pref_temperature_key), 0.0f)
-        val pressure = sp.getFloat(context?.getString(R.string.pref_pressure_key), 0.0f)
-        val windSpeed =  sp.getFloat(context?.getString(R.string.pref_wind_speed_key), 0.0f)
-        val windDirection = sp.getFloat(context?.getString(R.string.pref_wind_direction_key), 0.0f)
-        val clouds = sp.getFloat(context?.getString(R.string.pref_clouds_key), 0.0f)
-        val date = sp.getLong(context?.getString(R.string.pref_date_key), -1)
+        val whiteTheme = sp.getBoolean(context?.getString(R.string.widget_background_pref_key), context?.getString(R.string.widget_background_pref_default)!!.toBoolean())
+        val transparency = sp.getInt(context.getString(R.string.widget_transparency_pref_key), context.getString(R.string.widget_transparency_pref_default)!!.toInt())
 
         for (widgetId in appWidgetIds) {
             val options = appWidgetManager.getAppWidgetOptions(widgetId)
@@ -84,13 +79,13 @@ class WidgetProvider: AppWidgetProvider() {
 
             val remoteViews = getRemoteViews(context, widgetWidth, widgetHeight)
 
-            remoteViews.setTextViewText(R.id.tvDate, formattedDate(context, date))
-            remoteViews.setTextViewText(R.id.tvCityName, cityName)
-            remoteViews.setTextViewText(R.id.tvTemperature, formattedTemperature(context, temperature))
-            remoteViews.setTextViewText(R.id.tvPressure, formattedPressure(context, pressure))
-            remoteViews.setTextViewText(R.id.tvWind, formattedWind(context, windSpeed, windDirection))
-            remoteViews.setTextViewText(R.id.tvCloudiness, formattedCloudiness(context, clouds))
-            if(icon != -1) remoteViews.setImageViewResource(R.id.ivWeatherIcon, icon)
+            remoteViews.setTextViewText(R.id.tvDate, wd.formattedDate())
+            remoteViews.setTextViewText(R.id.tvCityName, wd.cityName)
+            remoteViews.setTextViewText(R.id.tvTemperature, wd.formattedTemperature())
+            remoteViews.setTextViewText(R.id.tvPressure, wd.formattedPressure())
+            remoteViews.setTextViewText(R.id.tvWind, wd.formattedWind())
+            remoteViews.setTextViewText(R.id.tvCloudiness, wd.formattedCloudiness())
+            if(wd.icon != -1) remoteViews.setImageViewResource(R.id.ivWeatherIcon, wd.icon)
 
             if (pb) {
                 remoteViews.setViewVisibility(R.id.pbWidgetRefresh, View.VISIBLE)
@@ -106,6 +101,34 @@ class WidgetProvider: AppWidgetProvider() {
                 remoteViews.setOnClickPendingIntent(R.id.ivRefresh, refreshPendingIntent)
                 remoteViews.setOnClickPendingIntent(R.id.tvCityName, refreshPendingIntent)
             }
+
+            var bgColor = context.resources.getColor(R.color.widget_dark_bgColor)
+            if(whiteTheme){
+                remoteViews.setTextColor(R.id.tvDate, context.resources.getColor(R.color.widget_white_textColor))
+                remoteViews.setTextColor(R.id.tvCityName, context.resources.getColor(R.color.widget_white_textColor))
+                remoteViews.setTextColor(R.id.tvTemperature, context.resources.getColor(R.color.widget_white_textColor))
+                remoteViews.setTextColor(R.id.tvPressure, context.resources.getColor(R.color.widget_white_textColor))
+                remoteViews.setTextColor(R.id.tvWind, context.resources.getColor(R.color.widget_white_textColor))
+                remoteViews.setTextColor(R.id.tvCloudiness, context.resources.getColor(R.color.widget_white_textColor))
+                remoteViews.setInt(R.id.rlMain, "setBackgroundColor", context.resources.getColor(R.color.widget_white_bgColor))
+
+                bgColor = context.resources.getColor(R.color.widget_white_bgColor)
+
+            }else{
+                remoteViews.setTextColor(R.id.tvDate, context.resources.getColor(R.color.widget_dark_textColor))
+                remoteViews.setTextColor(R.id.tvCityName, context.resources.getColor(R.color.widget_dark_textColor))
+                remoteViews.setTextColor(R.id.tvTemperature, context.resources.getColor(R.color.widget_dark_textColor))
+                remoteViews.setTextColor(R.id.tvPressure, context.resources.getColor(R.color.widget_dark_textColor))
+                remoteViews.setTextColor(R.id.tvWind, context.resources.getColor(R.color.widget_dark_textColor))
+                remoteViews.setTextColor(R.id.tvCloudiness, context.resources.getColor(R.color.widget_dark_textColor))
+                remoteViews.setInt(R.id.rlMain, "setBackgroundColor", context.resources.getColor(R.color.widget_dark_bgColor))
+            }
+
+            val r = Color.red(bgColor)
+            val g = Color.green(bgColor)
+            val b = Color.blue(bgColor)
+
+            remoteViews.setInt(R.id.rlMain, "setBackgroundColor", Color.argb(transparency, r, g, b))
 
             appWidgetManager.updateAppWidget(widgetId, remoteViews)
         }
@@ -123,8 +146,6 @@ class WidgetProvider: AppWidgetProvider() {
 
     //those numbers from developer.android.com
     private fun getCells(size: Int): Int {
-        var n = 2
-        while (70 * n - 30 < size) n++
-        return n - 1
+        return Math.floor(((size + 30) / 70).toDouble()).toInt()
     }
 }
