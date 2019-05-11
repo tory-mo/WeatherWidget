@@ -253,7 +253,7 @@ val extras = intent.extras
 	}
 ```
 
-When all confugurations are done, it's time to apply changes and update widget. Remember, that there must be called widget update
+When all confugurations are done, it's time to apply changes and update widget. Remember, that there must be called widget update. For each widget its own configuration activity is needed.
 
 ```kotlin
 private fun showAppWidget() {

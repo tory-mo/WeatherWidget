@@ -50,7 +50,6 @@
     <string name="widget_background_pref_default">false</string>
 
 
-
     <string name="widget_preview_default_temperature">12</string>
     <string name="widget_preview_default_city">Minsk</string>
     <string name="widget_preview_default_icon">800</string>
@@ -59,6 +58,8 @@
     <string name="widget_preview_default_windDirection">160</string>
     <string name="widget_preview_default_clouds">3</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

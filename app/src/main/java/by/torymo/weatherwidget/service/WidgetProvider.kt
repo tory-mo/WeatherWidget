@@ -146,6 +146,6 @@ class WidgetProvider: AppWidgetProvider() {
 
     //those numbers from developer.android.com
     private fun getCells(size: Int): Int {
-        return Math.floor(((size + 30) / 70).toDouble()).toInt()
+        return Math.ceil(((size + 30) / 70).toDouble()).toInt()
     }
 }
