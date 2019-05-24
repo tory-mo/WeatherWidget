@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "by.torymo.weatherwidget"
         minSdkVersion 17
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -22,7 +22,7 @@ android {
     }
 
     buildTypes.each {
-        it.buildConfigField 'String', 'OPEN_WEATHER_API_KEY', '"open_weather_key_here"'
+        it.buildConfigField 'String', 'OPEN_WEATHER_API_KEY', '"614f3ce8d6722e81389c6dd5a2d57900"'
     }
 }
 
@@ -41,7 +41,11 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
 
+
+
     def okhttpVersion = '3.9.1'
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
 }

@@ -1,26 +1,31 @@
 package by.torymo.weatherwidget
 
 
+
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.constraint.ConstraintLayout
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
-import android.widget.Toast
+import by.torymo.weatherwidget.service.WidgetController
 import kotlinx.android.synthetic.main.fragment_configuration.*
-import kotlinx.android.synthetic.main.widget4x1.view.*
+import kotlinx.android.synthetic.main.widget3x2.view.*
+import kotlinx.android.synthetic.main.widget4x1.view.ivWeatherIcon
+import kotlinx.android.synthetic.main.widget4x1.view.tvCityName
+import kotlinx.android.synthetic.main.widget4x1.view.tvCloudiness
+import kotlinx.android.synthetic.main.widget4x1.view.tvDate
+import kotlinx.android.synthetic.main.widget4x1.view.tvPressure
+import kotlinx.android.synthetic.main.widget4x1.view.tvTemperature
+import kotlinx.android.synthetic.main.widget4x1.view.tvWind
 
 class ConfigurationFragment : Fragment() {
 
@@ -28,9 +33,15 @@ class ConfigurationFragment : Fragment() {
     private var whiteTheme = false
     private var transparency: Int = 0
 
+    private lateinit var previewView: View
+
+    private lateinit var basicConfigActivity: BasicConfigActivity
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
+
+        basicConfigActivity = (activity as BasicConfigActivity)
     }
 
     override fun onCreateView(
@@ -48,37 +59,28 @@ class ConfigurationFragment : Fragment() {
         val ivWidgetPreview = mainView.findViewById<ImageView>(R.id.ivWidgetPreview)
         sbWidgetTransparency.progress = transparency
 
-        var paramLayoutInflater: Drawable = resources.getDrawable(R.drawable.empty_bg)
 
-        val wallpaperManager = WallpaperManager.getInstance(activity)
-        try {
-            paramLayoutInflater = if (wallpaperManager.wallpaperInfo != null) {
+        val paramLayoutInflater = try {
+            val wallpaperManager = WallpaperManager.getInstance(activity)
+            if (wallpaperManager.wallpaperInfo != null) {
                 wallpaperManager.wallpaperInfo.loadThumbnail(activity?.packageManager)
             } else {
                 wallpaperManager.drawable
             }
-        } catch (paramLayoutInflater: Exception) {
+        } catch (piException: Exception) {
+            resources.getDrawable(R.drawable.preview_bg3)
         }
 
         ivWidgetPreviewBg.background = paramLayoutInflater
 
-        val view = LayoutInflater.from(activity).inflate(R.layout.widget4x1, null)
-
-        val wd = WidgetData(activity, true)
-        view.tvDate?.text = wd.formattedDate()
-        view.tvCityName?.text = wd.cityName
-        view.ivWeatherIcon?.setImageDrawable(resources.getDrawable(wd.icon))
-        view.tvTemperature?.text = wd.formattedTemperature()
-        view.tvWind?.text = wd.formattedWind()
-        view.tvPressure?.text = wd.formattedPressure()
-        view.tvCloudiness?.text = wd.formattedCloudiness()
-
+        previewView = LayoutInflater.from(activity).inflate(basicConfigActivity.widgetType(), null)
+        widgetDataChanged()
 
         sbWidgetTransparency.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 // Display the current progress of SeekBar
                 transparency = sbWidgetTransparency.progress
-                widgetAppearanceChanged(view, ivWidgetPreview)
+                widgetAppearanceChanged(ivWidgetPreview)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar) {
                 // Do something
@@ -89,73 +91,88 @@ class ConfigurationFragment : Fragment() {
             }
         })
 
-        widgetAppearanceChanged(view, ivWidgetPreview)
+        widgetAppearanceChanged(ivWidgetPreview)
 
-        llWidgetBackground.setOnClickListener{backgroundLineClickListener(view, ivWidgetPreview)}
+        llWidgetBackground.setOnClickListener{backgroundLineClickListener(ivWidgetPreview)}
 
 
         return mainView
     }
 
-    private fun widgetAppearanceChanged(view: View, ivWidgetPreview: ImageView){
+    private fun widgetDataChanged(){
+        val wd = WidgetData(activity, basicConfigActivity.appWidgetId, true)
+        previewView.tvDate?.text = wd.formattedDate()
+        previewView.tvCityName?.text = wd.cityName
+        previewView.ivWeatherIcon?.setImageDrawable(resources.getDrawable(wd.icon))
+        previewView.tvTemperature?.text = wd.formattedTemperature()
+        previewView.tvWind?.text = wd.formattedWind()
+        previewView.tvPressure?.text = wd.formattedPressure()
+        previewView.tvCloudiness?.text = wd.formattedCloudiness()
+        previewView.tvHumidity?.text = wd.formattedHumidity()
+        previewView.tvWeatherDescription?.text = wd.description
+        previewView.tvSunrise?.text = wd.formattedSunrise()
+        previewView.tvSunset?.text = wd.formattedSunset()
+    }
+
+    private fun widgetAppearanceChanged(ivWidgetPreview: ImageView){
         val bgColor = if(whiteTheme)resources.getColor(R.color.widget_white_bgColor) else resources.getColor(R.color.widget_dark_bgColor)
         val txtColor = if(whiteTheme)resources.getColor(R.color.widget_white_textColor) else resources.getColor(R.color.widget_dark_textColor)
         val r = Color.red(bgColor)
         val g = Color.green(bgColor)
         val b = Color.blue(bgColor)
 
-        view.setBackgroundColor(Color.argb(transparency, r, g, b))
-        view.tvCityName?.setTextColor(txtColor)
-        view.tvTemperature?.setTextColor(txtColor)
-        view.tvWind?.setTextColor(txtColor)
-        view.tvPressure?.setTextColor(txtColor)
-        view.tvCloudiness?.setTextColor(txtColor)
-        view.tvDate?.setTextColor(txtColor)
+        previewView.setBackgroundColor(Color.argb(transparency, r, g, b))
+        previewView.tvCityName?.setTextColor(txtColor)
+        previewView.tvTemperature?.setTextColor(txtColor)
+        previewView.tvWind?.setTextColor(txtColor)
+        previewView.tvPressure?.setTextColor(txtColor)
+        previewView.tvCloudiness?.setTextColor(txtColor)
+        previewView.tvDate?.setTextColor(txtColor)
+        previewView.tvHumidity?.setTextColor(txtColor)
+        previewView.tvWeatherDescription?.setTextColor(txtColor)
+        previewView.tvSunrise?.setTextColor(txtColor)
+        previewView.tvSunset?.setTextColor(txtColor)
 
-        val width = resources.displayMetrics.widthPixels
-        val height = width/4
+        val width = basicConfigActivity.widgetPreviewWidth(resources.displayMetrics.widthPixels)
+        val height = basicConfigActivity.widgetPreviewHeight(resources.displayMetrics.widthPixels)
 
-        if (view.measuredHeight <= 0) {
-            view.measure(
+        if (previewView.measuredHeight <= 0) {
+            previewView.measure(
                 View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
             )
         }
-        val bitmap = Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(previewView.measuredWidth, previewView.measuredHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
-        view.draw(canvas)
+        previewView.layout(0, 0, previewView.measuredWidth, previewView.measuredHeight)
+        previewView.draw(canvas)
 
         ivWidgetPreview.setImageBitmap(bitmap)
     }
 
-    private fun backgroundLineClickListener(view: View, ivWidgetPreview: ImageView){
+    private fun backgroundLineClickListener(ivWidgetPreview: ImageView){
         whiteTheme = !whiteTheme
         cbWidgetBackground.isChecked = whiteTheme
-        widgetAppearanceChanged(view, ivWidgetPreview)
+        widgetAppearanceChanged(ivWidgetPreview)
     }
 
     private fun showAppWidget() {
         //If the intent doesn’t have a widget ID, then call finish()//
-        val appWidgetId = (activity as WidgetConfigActivity).appWidgetId
-
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-            Toast.makeText(activity, "Can't add a widget", Toast.LENGTH_LONG).show()
-            activity?.finish()
-        }
+        val appWidgetId = basicConfigActivity.appWidgetId
 
         //Perform the configuration and get an instance of the AppWidgetManager//
         val sp = PreferenceManager.getDefaultSharedPreferences(activity)
         val editor = sp.edit()
-
-        editor.putBoolean(getString(R.string.widget_background_pref_key), whiteTheme)
-        editor.putInt(getString(R.string.widget_transparency_pref_key), transparency)
+        editor.putBoolean(getString(R.string.widget_background_pref_key) + appWidgetId, whiteTheme)
+        editor.putInt(getString(R.string.widget_transparency_pref_key) + appWidgetId, transparency)
         editor.apply()
 
         val resultValue = Intent()
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         activity?.setResult(AppCompatActivity.RESULT_OK, resultValue)
         activity?.finish()
+
+        WidgetController.notifyWidget(appWidgetId, basicConfigActivity.widgetType(), basicConfigActivity, true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {

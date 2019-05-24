@@ -86,5 +86,23 @@
                         app:layout_constraintEnd_toEndOf="parent"/>
             </android.support.constraint.ConstraintLayout>
         </LinearLayout>
+        <LinearLayout
+                android:layout_width="match_parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/llBackgroundTransparency"
+                android:id="@+id/llWidgetLocation"
+                style="@style/SettingsRowStyle">
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/widget_location_settings"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"/>
+            <EditText android:layout_width="0dp"
+                      android:layout_height="match_parent"
+                      android:layout_weight="1"
+                      android:id="@+id/etLocation"/>
+        </LinearLayout>
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

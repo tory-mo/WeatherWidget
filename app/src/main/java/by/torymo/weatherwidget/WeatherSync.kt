@@ -1,67 +1,98 @@
 package by.torymo.weatherwidget
 
+import android.app.AlarmManager
 import android.app.IntentService
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import by.torymo.weatherwidget.service.CurrentWeatherResponse
-import by.torymo.weatherwidget.service.Requester
+import android.os.Build
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import android.preference.PreferenceManager
-import by.torymo.weatherwidget.service.WidgetProvider
+import by.torymo.weatherwidget.service.*
 
 
 class WeatherSyncService: IntentService("WeatherWidget"){
 
-    override fun onHandleIntent(intent: Intent?) {
-        val weatherRequester = Requester()
-        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+    companion object{
+        private const val WIDGET_TYPE_EXTRA = "widgetType"
+        private const val WIDGET_IDS_EXTRA = "wids"
+        private const val WIDGET_CITY_EXTRA = "city"
+        private const val ACTION_EXTRA = "action"
 
-        val call = weatherRequester.getCurrentWeatherByCityName("Minsk")
+        enum class SyncActions{ ENABLE, UPDATE}
+
+        fun uploadData(cities: Array<String>, wIds: IntArray, cls: Class<*>, context: Context, action: SyncActions){
+            val alarm = context.applicationContext?.getSystemService(Context.ALARM_SERVICE) as AlarmManager? ?: return
+            val updaterIntent = Intent(context.applicationContext, WeatherSyncService::class.java)
+            updaterIntent.putExtra(WIDGET_TYPE_EXTRA, cls.canonicalName)
+            updaterIntent.putExtra(WIDGET_IDS_EXTRA, wIds)
+            updaterIntent.putExtra(WIDGET_CITY_EXTRA, cities)
+            updaterIntent.putExtra(ACTION_EXTRA, action.ordinal)
+
+            val pi = PendingIntent.getService(
+                context.applicationContext,
+                0,
+                updaterIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+            alarm.cancel(pi)
+
+            val nextAlarm = System.currentTimeMillis()
+            when{
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarm, pi)
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> alarm.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    nextAlarm,
+                    pi
+                )
+                else -> alarm.set(
+                    AlarmManager.RTC_WAKEUP,
+                    nextAlarm,
+                    pi
+                )
+            }
+        }
+    }
+
+    override fun onHandleIntent(intent: Intent?) {
+        val cls = intent?.getStringExtra(WIDGET_TYPE_EXTRA)
+        val wIds = intent?.getIntArrayExtra(WIDGET_IDS_EXTRA)
+        val action = SyncActions.values()[intent?.getIntExtra(ACTION_EXTRA, SyncActions.UPDATE.ordinal) ?: SyncActions.UPDATE.ordinal]
+        val city = intent?.getStringArrayExtra(WIDGET_CITY_EXTRA)
+
+        if(cls == null ||  wIds == null || city == null || wIds.isEmpty() || city.isEmpty() || wIds.size != city.size){
+            if(cls != null)
+                WidgetController.notifyWidgets(cls, this, false)
+            return
+        }
 
         val ctx = this
+
+        for(i in 0..wIds.size){
+            if(city[i].isNotEmpty())
+                request(city[i], wIds[i], cls, ctx, action)
+        }
+    }
+
+    private fun request(city: String, wId: Int, cls: String, ctx: Context, action: SyncActions){
+        val weatherRequester = Requester()
+        val call = weatherRequester.getCurrentWeatherByCityName(city)
 
         call.enqueue(object: Callback<CurrentWeatherResponse> {
             override fun onResponse(call: Call<CurrentWeatherResponse>, response: Response<CurrentWeatherResponse>) {
                 if (response.isSuccessful) {
                     val seriesDetailsResult = response.body()
                     seriesDetailsResult?.let {
-                        val editor = sp.edit()
-                        editor.putString(getString(R.string.pref_city_name_key), it.name)
-                        editor.putString(getString(R.string.pref_weather_base_key), it.base)
-                        editor.putLong(getString(R.string.pref_weather_date_key), it.dt)
-                        editor.putInt(getString(R.string.pref_weather_icon_key), it.weather[0].id)
-                        editor.putFloat(getString(R.string.pref_temperature_key), it.main.temp)
-                        editor.putFloat(getString(R.string.pref_pressure_key), it.main.pressure)
-                        editor.putFloat(getString(R.string.pref_wind_speed_key), it.wind.speed)
-                        editor.putFloat(getString(R.string.pref_wind_direction_key), it.wind.deg)
-                        editor.putFloat(getString(R.string.pref_clouds_key), it.clouds.all)
-                        editor.putLong(getString(R.string.pref_date_key), it.dt*1000L)
-                        editor.apply()
+                        WidgetData.saveWidgetData(ctx, wId, it)
                     }
                 }
-                notifyWidget(ctx, false)
+                WidgetController.notifyWidget(wId, cls, ctx, false)
             }
 
             override fun onFailure(call: Call<CurrentWeatherResponse>, t: Throwable) {
-                notifyWidget(ctx, false)
+                WidgetController.notifyWidget(wId, cls, ctx, false)
             }
         })
-    }
-
-    fun notifyWidget(ctx: Context, progressBar: Boolean) {
-        val wIds = AppWidgetManager.getInstance(ctx.applicationContext)
-            .getAppWidgetIds(ComponentName(ctx.applicationContext, WidgetProvider::class.java))
-        if (wIds != null && wIds.isNotEmpty()) {
-            val wIntent = Intent(ctx, WidgetProvider::class.java)
-            wIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            wIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, wIds)
-            if (progressBar)
-                wIntent.putExtra(WidgetProvider.PROGRESS_BAR_EXTRA, true)
-            ctx.sendBroadcast(wIntent)
-        }
     }
 }

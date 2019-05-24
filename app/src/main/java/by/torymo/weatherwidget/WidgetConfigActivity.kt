@@ -1,25 +1,22 @@
 package by.torymo.weatherwidget
 
-import android.appwidget.AppWidgetManager
-import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.preference.PreferenceManager
 
 
-class WidgetConfigActivity : AppCompatActivity() {
+class WidgetConfigActivity : BasicConfigActivity() {
+    override fun widgetPreviewWidth(displayWidth: Int): Int {
+        return displayWidth
+    }
 
-    var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+    override fun widgetPreviewHeight(displayWidth: Int): Int {
+        return displayWidth / 4
+    }
+
+    override fun widgetType(): Int {
+        return R.layout.widget4x1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_widget_config)
-
-        val extras = intent.extras
-        if (extras != null) {
-            appWidgetId = extras.getInt(
-                AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID)
-        }
     }
 }

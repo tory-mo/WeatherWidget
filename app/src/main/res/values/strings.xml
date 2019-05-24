@@ -5,14 +5,16 @@
 
     <string name="pref_city_id_key">city_id_key</string>
     <string name="pref_city_name_key">city_name_key</string>
-    <string name="pref_weather_date_key">weather_date_key</string>
-    <string name="pref_weather_base_key">weather_base_key</string>
     <string name="pref_weather_icon_key">weather_icon_key</string>
     <string name="pref_temperature_key">temperature_key</string>
     <string name="pref_pressure_key">pressure_key</string>
     <string name="pref_wind_speed_key">wind_speed_key</string>
     <string name="pref_wind_direction_key">wind_direction_key</string>
     <string name="pref_clouds_key">clouds_key</string>
+    <string name="pref_humidity_key">humidity_key</string>
+    <string name="pref_weather_description_key">weather_description_key</string>
+    <string name="pref_sunrise_key">sunrise_key</string>
+    <string name="pref_sunset_key">sunset_key</string>
     <string name="pref_date_key">date_key</string>
 
     <string name="wind_direction_n" translatable="true">N</string>
@@ -24,23 +26,20 @@
     <string name="wind_direction_s" translatable="true">S</string>
     <string name="wind_direction_e" translatable="true">E</string>
 
-    <string name="format_temperature"><xliff:g id="temp">%d</xliff:g>\u00B0C
-    </string>
-    <string name="format_pressure" translatable="true">Pressure: <xliff:g id="pressure">%d</xliff:g> hPa
-    </string>
-    <string name="format_wind" translatable="true">Wind: <xliff:g id="wind">%d</xliff:g> mph,
-        <xliff:g id="direction">%s</xliff:g>
-    </string>
-    <string name="format_cloudiness" translatable="true">Cloudiness: <xliff:g id="cloudiness">%d</xliff:g>%%
-    </string>
-    <string name="format_updated">Updated:
-        <xliff:g id="date">%s</xliff:g>
-    </string>
+    <string name="format_temperature"><xliff:g id="temp">%d</xliff:g>\u00B0C</string>
+    <string name="format_pressure" translatable="true">Pressure: <xliff:g id="pressure">%d</xliff:g> hPa</string>
+    <string name="format_wind" translatable="true">Wind: <xliff:g id="wind">%d</xliff:g> mph, <xliff:g id="direction">%s</xliff:g></string>
+    <string name="format_cloudiness" translatable="true">Cloudiness: <xliff:g id="cloudiness">%d</xliff:g>%%</string>
+    <string name="format_humidity" translatable="true">Humidity: <xliff:g id="humidity">%d</xliff:g>%%</string>
+    <string name="format_sunrise" translatable="true">Sunrise: <xliff:g id="sunrise">%s</xliff:g></string>
+    <string name="format_sunset" translatable="true">Sunset: <xliff:g id="sunset">%s</xliff:g></string>
+    <string name="format_updated">Updated:<xliff:g id="date">%s</xliff:g></string>
 
     <string name="refresh">Refresh</string>
     <string name="create_widget">Create widget</string>
     <string name="widget_background_settings">White background</string>
     <string name="widget_transparency_settings">Transparency</string>
+    <string name="widget_location_settings">Location</string>
 
 
     <string name="widget_transparency_pref_key">pref_transparency</string>
@@ -57,9 +56,9 @@
     <string name="widget_preview_default_windSpeed">1</string>
     <string name="widget_preview_default_windDirection">160</string>
     <string name="widget_preview_default_clouds">3</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
+    <string name="widget_preview_default_humidity">80</string>
+    <string name="widget_preview_default_description">Clear</string>
+    <string name="widget_preview_default_sunrise">1557799793000</string>
+    <string name="widget_preview_default_sunset">1557856947000</string>
 
 </resources>
